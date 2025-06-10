@@ -1,0 +1,224 @@
+Project Structure:
+
+magento-automation/
+├── features/
+│   └── SignupLogin.feature
+├── src/
+│   ├── main/
+│   │   └── java/pageObjects/
+│   │       ├── CreateAccountPage.java
+│   │       └── LoginPage.java
+│   └── test/
+│       └── java/stepDefinitions/
+│           └── SignupLoginSteps.java
+│       └── java/runners/
+│           └── TestRunner.java
+├── evidence/
+│   └── (screenshots or recordings here)
+├── pom.xml
+└── README.md
+
+---
+
+// features/SignupLogin.feature
+Feature: User account actions
+
+  Scenario: User signs up successfully
+    Given I open the Magento site
+    When I navigate to Create Account
+    And I enter valid user details
+    And I submit the form
+    Then I should see the account dashboard
+
+  Scenario: User logs in successfully
+    Given I open the Magento site
+    When I navigate to Sign In
+    And I enter valid credentials
+    And I click Sign In
+    Then I should see the user dashboard
+
+---
+
+// pageObjects/CreateAccountPage.java
+package pageObjects;
+
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.PageFactory;
+
+public class CreateAccountPage {
+    WebDriver driver;
+
+    @FindBy(id = "firstname")
+    WebElement firstNameField;
+
+    @FindBy(id = "lastname")
+    WebElement lastNameField;
+
+    @FindBy(id = "email_address")
+    WebElement emailField;
+
+    @FindBy(id = "password")
+    WebElement passwordField;
+
+    @FindBy(id = "password-confirmation")
+    WebElement confirmPasswordField;
+
+    @FindBy(css = "button[title='Create an Account']")
+    WebElement createAccountBtn;
+
+    public CreateAccountPage(WebDriver driver) {
+        this.driver = driver;
+        PageFactory.initElements(driver, this);
+    }
+
+    public void createAccount(String firstName, String lastName, String email, String password) {
+        firstNameField.sendKeys(firstName);
+        lastNameField.sendKeys(lastName);
+        emailField.sendKeys(email);
+        passwordField.sendKeys(password);
+        confirmPasswordField.sendKeys(password);
+        createAccountBtn.click();
+    }
+}
+
+---
+
+// pageObjects/LoginPage.java
+package pageObjects;
+
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.PageFactory;
+
+public class LoginPage {
+    WebDriver driver;
+
+    @FindBy(id = "email")
+    WebElement emailField;
+
+    @FindBy(id = "pass")
+    WebElement passwordField;
+
+    @FindBy(id = "send2")
+    WebElement signInBtn;
+
+    public LoginPage(WebDriver driver) {
+        this.driver = driver;
+        PageFactory.initElements(driver, this);
+    }
+
+    public void login(String email, String password) {
+        emailField.sendKeys(email);
+        passwordField.sendKeys(password);
+        signInBtn.click();
+    }
+}
+
+---
+
+// stepDefinitions/SignupLoginSteps.java
+package stepDefinitions;
+
+import io.cucumber.java.en.*;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import pageObjects.CreateAccountPage;
+import pageObjects.LoginPage;
+
+public class SignupLoginSteps {
+    WebDriver driver;
+    CreateAccountPage createAccountPage;
+    LoginPage loginPage;
+
+    @Given("I open the Magento site")
+    public void openSite() {
+        driver = new ChromeDriver();
+        driver.manage().window().maximize();
+        driver.get("https://magento.softwaretestingboard.com/");
+    }
+
+    @When("I navigate to Create Account")
+    public void goToCreateAccount() {
+        driver.findElement(By.linkText("Create an Account")).click();
+    }
+
+    @When("I enter valid user details")
+    public void enterUserDetails() {
+        createAccountPage = new CreateAccountPage(driver);
+        String email = "user" + System.currentTimeMillis() + "@test.com";
+        createAccountPage.createAccount("John", "Doe", email, "Password123");
+    }
+
+    @Then("I should see the account dashboard")
+    public void verifyDashboard() {
+        assert driver.getTitle().contains("My Account");
+        driver.quit();
+    }
+
+    @When("I navigate to Sign In")
+    public void goToSignIn() {
+        driver.findElement(By.linkText("Sign In")).click();
+    }
+
+    @When("I enter valid credentials")
+    public void enterCredentials() {
+        loginPage = new LoginPage(driver);
+        loginPage.login("your_registered_email@test.com", "Password123");
+    }
+
+    @Then("I should see the user dashboard")
+    public void verifyLoginDashboard() {
+        assert driver.getTitle().contains("My Account");
+        driver.quit();
+    }
+}
+
+---
+
+// runners/TestRunner.java
+package runners;
+
+import io.cucumber.junit.Cucumber;
+import io.cucumber.junit.CucumberOptions;
+import org.junit.runner.RunWith;
+
+@RunWith(Cucumber.class)
+@CucumberOptions(
+        features = "features",
+        glue = {"stepDefinitions"},
+        plugin = {"pretty", "html:target/cucumber-reports.html"},
+        monochrome = true
+)
+public class TestRunner {
+}
+
+---
+
+// README.md
+# Magento Sign-Up and Login Automation
+
+This project automates the sign-up and login flows for [Magento Testing Site](https://magento.softwaretestingboard.com/).
+
+## 📌 Features
+- BDD with Cucumber
+- POM Design Pattern
+- Selenium WebDriver (Java)
+
+## 🚀 How to Run
+```bash
+mvn clean test
+```
+
+## 🧪 Scenarios
+- User can create a new account
+- User can login with valid credentials
+
+## 📂 Folder Structure
+- `features/` — Gherkin scenarios
+- `pageObjects/` — POM classes
+- `stepDefinitions/` — Cucumber step defs
+- `runners/` — Test runner
+- `evidence/` — Screenshots or video proof
