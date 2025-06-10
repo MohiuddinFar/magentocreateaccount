@@ -1,0 +1,18 @@
+magento-automation/
+├── features/
+│   └── SignupLogin.feature
+├── src/
+│   ├── main/
+│   │   └── java/pageObjects/
+│   │       ├── CreateAccountPage.java
+│   │       └── LoginPage.java
+│   └── test/
+│       └── java/stepDefinitions/
+│           └── SignupLoginSteps.java
+│       └── java/runners/
+│           └── TestRunner.java
+├── evidence/
+│   ├── signup-success.png
+│   └── login-success.png
+├── pom.xml
+└── README.md
